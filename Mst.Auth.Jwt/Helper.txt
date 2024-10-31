@@ -1,3 +1,3 @@
 ﻿dotnet pack --configuration Release
 
-https://github.com/mehransattari/Mst.FileManager
+https://github.com/mehransattari/Mst.Auth.Jwt
