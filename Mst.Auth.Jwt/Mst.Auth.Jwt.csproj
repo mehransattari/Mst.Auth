@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>MST.Auth.Jwt</PackageId>
+    <Authors>Mehran Sattari</Authors>
+    <Company>MST</Company>
+    <Product>Mst.Auth.Jwt</Product>
+    <Copyright>2024</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://mehransattary.ir/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mehransattari/Mst.Auth.Jwt</RepositoryUrl>
+    <Description>Mehran Sattari Framework</Description>
+    <PackageTags>Auth Jwt</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <PackageIcon>Mst.png</PackageIcon>
+    <PackageIconUrl />
+    <PackageReleaseNotes>Auth Jwt</PackageReleaseNotes>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Update="Mst.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

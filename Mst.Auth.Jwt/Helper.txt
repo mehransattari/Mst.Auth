@@ -1,0 +1,3 @@
+﻿dotnet pack --configuration Release
+
+https://github.com/mehransattari/Mst.FileManager
