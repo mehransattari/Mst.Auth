@@ -15,7 +15,7 @@
     <Description>Mehran Sattari Framework</Description>
     <PackageTags>Auth Jwt</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <PackageIcon>Mst.png</PackageIcon>
     <PackageIconUrl />
     <PackageReleaseNotes>Auth Jwt</PackageReleaseNotes>

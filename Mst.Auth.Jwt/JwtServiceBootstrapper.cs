@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Mst.Auth.Jwt;
 
-public static class JwtServiceExtensions
+public static class JwtServiceBootstrapper
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, string sectionName)
     {
@@ -38,6 +38,7 @@ public static class JwtServiceExtensions
         });
 
         services.AddScoped<JwtService>();
+        services.AddSingleton<JwtSettings>();
 
         return services;
     }
