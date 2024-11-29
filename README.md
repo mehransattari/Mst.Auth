@@ -96,6 +96,16 @@ app.UseAuthorization();
 
 ### Add DbContext
 ```
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
+
+
   "ConnectionStrings": {
     "DefaultConnection": "Server=DESKTOP-AAOIHBN;Database=UserManagementDb;Trusted_Connection=True;MultipleActiveResultSets=true"
   },
