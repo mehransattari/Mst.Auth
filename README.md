@@ -48,6 +48,107 @@ public class UserRegisterDto
 
 ```
 
+### Add SwaggerGen
+```
+ <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+
+builder.Services.AddSwaggerGen(c =>  
+{  
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });  
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme  
+    {  
+        Name = "Authorization",  
+        Type = SecuritySchemeType.ApiKey,  
+        Scheme = "Bearer",  
+        BearerFormat = "JWT",  
+        In = ParameterLocation.Header,  
+        Description = "Enter 'Bearer' followed by a space and your token."  
+    });  
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement  
+    {  
+        {  
+            new OpenApiSecurityScheme  
+            {  
+                Reference = new OpenApiReference  
+                {  
+                    Type = ReferenceType.SecurityScheme,  
+                    Id = "Bearer"  
+                }  
+            },  
+            new string[] {}  
+        }  
+    });  
+});  
+
+if (app.Environment.IsDevelopment())  
+{  
+    app.UseSwagger();  
+    app.UseSwaggerUI();  
+}  
+
+app.UseAuthentication();  
+app.UseAuthorization();
+
+```
+
+
+### Add DbContext
+```
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=DESKTOP-AAOIHBN;Database=UserManagementDb;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+
+
+builder.Services.AddDbContext<UserManagementContext>(options =>
+     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+public class User
+{
+    public int Id { get; set; }
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public string Role { get; set; }
+    public string RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiryTime { get; set; }
+}
+
+
+public class UserManagementContext : DbContext
+{
+    public UserManagementContext(DbContextOptions<UserManagementContext> options) : base(options) { }
+
+    public DbSet<User> Users { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>().HasData(
+            new User
+            {
+                Id = 1,
+                Username = "admin",
+                Password = BCrypt.Net.BCrypt.HashPassword("admin123"), 
+                Role = "Admin",
+                RefreshToken = Guid.NewGuid().ToString(), 
+                RefreshTokenExpiryTime = DateTime.Now.AddDays(7) 
+            },
+            new User
+            {
+                Id = 2,
+                Username = "user",
+                Password = BCrypt.Net.BCrypt.HashPassword("user123"), 
+                Role = "User",
+                RefreshToken = Guid.NewGuid().ToString(), 
+                RefreshTokenExpiryTime = DateTime.Now.AddDays(7) 
+            }
+        );
+    }
+
+}
+
+```
+
 
 ###How Use Controller
 
@@ -161,101 +262,4 @@ public class UsersController : ControllerBase
 
 ```
 
-### Add SwaggerGen
-```
-builder.Services.AddSwaggerGen(c =>  
-{  
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });  
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme  
-    {  
-        Name = "Authorization",  
-        Type = SecuritySchemeType.ApiKey,  
-        Scheme = "Bearer",  
-        BearerFormat = "JWT",  
-        In = ParameterLocation.Header,  
-        Description = "Enter 'Bearer' followed by a space and your token."  
-    });  
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement  
-    {  
-        {  
-            new OpenApiSecurityScheme  
-            {  
-                Reference = new OpenApiReference  
-                {  
-                    Type = ReferenceType.SecurityScheme,  
-                    Id = "Bearer"  
-                }  
-            },  
-            new string[] {}  
-        }  
-    });  
-});  
-
-if (app.Environment.IsDevelopment())  
-{  
-    app.UseSwagger();  
-    app.UseSwaggerUI();  
-}  
-
-app.UseAuthentication();  
-app.UseAuthorization();
-
-```
-
-
-### Add DbContext
-```
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=DESKTOP-AAOIHBN;Database=UserManagementDb;Trusted_Connection=True;MultipleActiveResultSets=true"
-  },
-
-
-builder.Services.AddDbContext<UserManagementContext>(options =>
-     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-public class User
-{
-    public int Id { get; set; }
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public string Role { get; set; }
-    public string RefreshToken { get; set; }
-    public DateTime RefreshTokenExpiryTime { get; set; }
-}
-
-
-public class UserManagementContext : DbContext
-{
-    public UserManagementContext(DbContextOptions<UserManagementContext> options) : base(options) { }
-
-    public DbSet<User> Users { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<User>().HasData(
-            new User
-            {
-                Id = 1,
-                Username = "admin",
-                Password = BCrypt.Net.BCrypt.HashPassword("admin123"), 
-                Role = "Admin",
-                RefreshToken = Guid.NewGuid().ToString(), 
-                RefreshTokenExpiryTime = DateTime.Now.AddDays(7) 
-            },
-            new User
-            {
-                Id = 2,
-                Username = "user",
-                Password = BCrypt.Net.BCrypt.HashPassword("user123"), 
-                Role = "User",
-                RefreshToken = Guid.NewGuid().ToString(), 
-                RefreshTokenExpiryTime = DateTime.Now.AddDays(7) 
-            }
-        );
-    }
-
-}
-
-```
