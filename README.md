@@ -1,6 +1,6 @@
 ### Install package
 
-`Install-Package MST.Auth.Jwt -Version 1.0.0`
+`Install-Package MST.Auth.Jwt -Version 1.0.1`
 
 ### Program.cs
 ```
