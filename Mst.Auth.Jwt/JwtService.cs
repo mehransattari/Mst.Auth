@@ -8,9 +8,9 @@ using System.Text;
 namespace Mst.Auth.Jwt;
 public class JwtService
 {
-    private readonly JwtSettings _jwtSettings;
+    private readonly IOptions<JwtSettings> _jwtSettings;
 
-    public JwtService(JwtSettings jwtSettings)
+    public JwtService(IOptions<JwtSettings> jwtSettings)
     {
         _jwtSettings = jwtSettings;
     }
@@ -29,13 +29,13 @@ public class JwtService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
+            issuer: _jwtSettings.Value.Issuer,
+            audience: _jwtSettings.Value.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes),
             signingCredentials: creds
         );
 
@@ -57,11 +57,11 @@ public class JwtService
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey)),
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidIssuer = _jwtSettings.Issuer,
-            ValidAudience = _jwtSettings.Audience,
+            ValidIssuer = _jwtSettings.Value.Issuer,
+            ValidAudience = _jwtSettings.Value.Audience,
             ValidateLifetime = false // برای توکن منقضی‌شده
         };
 
