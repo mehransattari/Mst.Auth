@@ -36,6 +36,19 @@ public static class JwtServiceBootstrapper
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             };
             options.SaveToken = true;
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    Console.WriteLine("Authentication failed: " + context.Exception.Message);
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = context =>
+                {
+                    Console.WriteLine("Token validated: " + context.SecurityToken);
+                    return Task.CompletedTask;
+                }
+            };
         });
 
         services.AddScoped<JwtService>();

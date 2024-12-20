@@ -29,13 +29,16 @@ public class JwtService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
+        //var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+        var expires= DateTime.Now.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             issuer: _jwtSettings.Value.Issuer,
             audience: _jwtSettings.Value.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes),
+            expires: expires,
             signingCredentials: creds
         );
 
