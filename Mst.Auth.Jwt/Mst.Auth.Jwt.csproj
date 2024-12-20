@@ -15,17 +15,19 @@
     <Description>Mehran Sattari Framework</Description>
     <PackageTags>Auth Jwt</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>1.0.3</Version>
     <PackageIcon>Mst.png</PackageIcon>
     <PackageIconUrl />
     <PackageReleaseNotes>Auth Jwt</PackageReleaseNotes>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
   </ItemGroup>
+
+
 
 
   <ItemGroup>

@@ -10,6 +10,8 @@ public static class JwtServiceBootstrapper
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, string sectionName)
     {
+        services.AddSingleton<JwtSettings>();
+
         var jwtSettingsSection = configuration.GetSection(sectionName);
         services.Configure<JwtSettings>(jwtSettingsSection);
 
@@ -18,7 +20,6 @@ public static class JwtServiceBootstrapper
 
         services.AddAuthentication(options =>
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         })
@@ -38,7 +39,6 @@ public static class JwtServiceBootstrapper
         });
 
         services.AddScoped<JwtService>();
-        services.AddSingleton<JwtSettings>();
 
         return services;
     }

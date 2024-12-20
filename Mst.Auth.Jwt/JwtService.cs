@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,20 +10,24 @@ public class JwtService
 {
     private readonly JwtSettings _jwtSettings;
 
-    public JwtService(IOptions<JwtSettings> jwtSettings)
+    public JwtService(JwtSettings jwtSettings)
     {
-        _jwtSettings = jwtSettings.Value;
+        _jwtSettings = jwtSettings;
     }
 
-    public string GenerateToken(string userId, string role,string phoneNumber="")
+    public string GenerateToken(string userId, IEnumerable<string> roles, string phoneNumber = "")
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.MobilePhone, phoneNumber),
             new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim(ClaimTypes.Role, role),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -33,7 +35,7 @@ public class JwtService
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(_jwtSettings.ExpiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
             signingCredentials: creds
         );
 
