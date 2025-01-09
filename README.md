@@ -5,6 +5,10 @@
 ### Program.cs
 ```
 builder.Services.AddJwtAuthentication(builder.Configuration, sectionName:"JwtSettings");
+
+     app.UseAuthentication(); 
+     app.UseAuthorization();  
+     app.UseRolePermissionMiddleware(); 
 ```
                              
 
