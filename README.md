@@ -5,6 +5,10 @@
 ### Program.cs
 ```
 builder.Services.AddJwtAuthentication(builder.Configuration, sectionName:"JwtSettings");
+
+     app.UseAuthentication(); 
+     app.UseAuthorization();  
+     app.UseRolePermissionMiddleware(); 
 ```
                              
 
@@ -166,6 +170,7 @@ public class UserManagementContext : DbContext
 [Route("api/[controller]")]  
 [ApiController]  
 [Authorize]  
+[RolePermission(roles: new[] { "Admin" }, permissions: new[] { "EditDashboard" })]
 public class UsersController : ControllerBase  
 {  
     private readonly UserManagementContext _context;  
