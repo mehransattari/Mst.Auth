@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -13,9 +14,11 @@ public static class JwtServiceBootstrapper
         services.AddSingleton<JwtSettings>();
 
         var jwtSettingsSection = configuration.GetSection(sectionName);
+
         services.Configure<JwtSettings>(jwtSettingsSection);
 
         var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
+
         var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
 
         services.AddAuthentication(options =>
@@ -54,5 +57,10 @@ public static class JwtServiceBootstrapper
         services.AddScoped<JwtService>();
 
         return services;
+    }
+
+    public static IApplicationBuilder UseRolePermissionMiddleware(this IApplicationBuilder app)
+    {
+       return  app.UseMiddleware<RolePermissionMiddleware>();
     }
 }
