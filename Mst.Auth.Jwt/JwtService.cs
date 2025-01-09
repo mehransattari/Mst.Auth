@@ -15,6 +15,57 @@ public class JwtService
         _jwtSettings = jwtSettings;
     }
 
+    public string GenerateToken(string userId)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _jwtSettings.Value.Issuer,
+            audience: _jwtSettings.Value.Audience,
+            claims: claims,
+            expires: expires,
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateToken(string userId, string phoneNumber = "")
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.MobilePhone, phoneNumber),
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _jwtSettings.Value.Issuer,
+            audience: _jwtSettings.Value.Audience,
+            claims: claims,
+            expires: expires,
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
     public string GenerateToken(string userId, IEnumerable<string> roles, string phoneNumber = "")
     {
         var claims = new List<Claim>
@@ -29,11 +80,48 @@ public class JwtService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        //var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
-        var expires= DateTime.Now.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+        var expires= DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
+
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _jwtSettings.Value.Issuer,
+            audience: _jwtSettings.Value.Audience,
+            claims: claims,
+            expires: expires,
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateToken(string userId, IEnumerable<string> roles, IEnumerable<string> permissions, string phoneNumber = "")
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.MobilePhone, phoneNumber),
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        foreach (var permission in permissions)
+        {
+            claims.Add(new Claim("Permission", permission));
+        }
+
+        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
         var token = new JwtSecurityToken(
             issuer: _jwtSettings.Value.Issuer,
             audience: _jwtSettings.Value.Audience,
@@ -69,8 +157,11 @@ public class JwtService
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
+
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
         var jwtSecurityToken = securityToken as JwtSecurityToken;
+
         if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             throw new SecurityTokenException("Invalid token");
 
