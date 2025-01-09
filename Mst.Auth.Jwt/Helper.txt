@@ -2,11 +2,38 @@
 
 https://github.com/mehransattari/Mst.Auth.Jwt
 
+*******************************************************
+
+
 
 How Use :
 
-[RolePermission(roles: new[] { "Admin" }, permissions: new[] { "EditDashboard" })]
+*******************************************************
+
+[ServiceFilter(typeof(RolePermissionFilter))]
+[RolePermission]
 public IActionResult EditDashboard()
 {
     return Ok("Dashboard edited successfully!");
 }
+
+*******************************************************
+
+appsetting.json : 
+
+  "RolePermissionConfig": {
+    "ProtectedEndpoints": [
+      {
+        "Path": "/dashboard",
+        "Roles": ["Admin", "Manager"],
+        "Permissions": ["ViewDashboard", "EditDashboard"]
+      },
+      {
+        "Path": "/admin",
+        "Roles": ["Admin"],
+        "Permissions": ["FullAccess"]
+      }
+    ],
+    "ExcludedPaths": ["/login", "/register", "/public"]
+  }
+*******************************************************

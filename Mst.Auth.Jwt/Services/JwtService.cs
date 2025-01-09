@@ -8,12 +8,18 @@ using System.Text;
 namespace Mst.Auth.Jwt;
 public class JwtService
 {
+    #region ***=============Constructor=======================***
+
     private readonly IOptions<JwtSettings> _jwtSettings;
 
     public JwtService(IOptions<JwtSettings> jwtSettings)
     {
         _jwtSettings = jwtSettings;
     }
+
+    #endregion
+
+    #region ***=============Methods===========================***
 
     public string GenerateToken(string userId)
     {
@@ -23,21 +29,7 @@ public class JwtService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
-
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Value.Issuer,
-            audience: _jwtSettings.Value.Audience,
-            claims: claims,
-            expires: expires,
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return GetGenerateToken(claims);
     }
 
     public string GenerateToken(string userId, string phoneNumber = "")
@@ -49,21 +41,8 @@ public class JwtService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+        return GetGenerateToken(claims);
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
-
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Value.Issuer,
-            audience: _jwtSettings.Value.Audience,
-            claims: claims,
-            expires: expires,
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     public string GenerateToken(string userId, IEnumerable<string> roles, string phoneNumber = "")
@@ -80,21 +59,8 @@ public class JwtService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var expires= DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+        return GetGenerateToken(claims);
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
-
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Value.Issuer,
-            audience: _jwtSettings.Value.Audience,
-            claims: claims,
-            expires: expires,
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     public string GenerateToken(string userId, IEnumerable<string> roles, IEnumerable<string> permissions, string phoneNumber = "")
@@ -116,21 +82,8 @@ public class JwtService
             claims.Add(new Claim("Permission", permission));
         }
 
-        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+        return GetGenerateToken(claims);
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
-
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Value.Issuer,
-            audience: _jwtSettings.Value.Audience,
-            claims: claims,
-            expires: expires,
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     public string GenerateRefreshToken()
@@ -167,4 +120,29 @@ public class JwtService
 
         return principal;
     }
+
+    #endregion
+
+    #region ***=============Private Methods===================***
+
+    private string GetGenerateToken(List<Claim> claims)
+    {
+        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.Value.ExpiryMinutes);
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.SecretKey));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _jwtSettings.Value.Issuer,
+            audience: _jwtSettings.Value.Audience,
+            claims: claims,
+            expires: expires,
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    #endregion
 }

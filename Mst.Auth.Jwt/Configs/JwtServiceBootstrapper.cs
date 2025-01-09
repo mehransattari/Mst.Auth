@@ -9,12 +9,29 @@ namespace Mst.Auth.Jwt;
 
 public static class JwtServiceBootstrapper
 {
-    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, string sectionName)
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, 
+                                                          IConfiguration configuration,
+                                                          string jwtSettingSection)
+    {
+        SetJwtConfig(services, configuration, jwtSettingSection);
+        return services;
+    }
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services,
+                                                         IConfiguration configuration,
+                                                         string jwtSettingSection,
+                                                         string rolePermissionConfig)
+    {
+        services.AddSingleton<RolePermissionConfig>();
+        var _rolePermissionConfig = configuration.GetSection(rolePermissionConfig);
+        services.Configure<RolePermissionConfig>(_rolePermissionConfig);
+
+        SetJwtConfig(services, configuration, jwtSettingSection);
+        return services;
+    }
+    private static void SetJwtConfig(IServiceCollection services, IConfiguration configuration, string jwtSettingSection)
     {
         services.AddSingleton<JwtSettings>();
-
-        var jwtSettingsSection = configuration.GetSection(sectionName);
-
+        var jwtSettingsSection = configuration.GetSection(jwtSettingSection);
         services.Configure<JwtSettings>(jwtSettingsSection);
 
         var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
@@ -55,12 +72,10 @@ public static class JwtServiceBootstrapper
         });
 
         services.AddScoped<JwtService>();
-
-        return services;
     }
-
-    public static IApplicationBuilder UseRolePermissionMiddleware(this IApplicationBuilder app)
+       
+    public static IApplicationBuilder UseRolePermissionsAccess(this IApplicationBuilder app)
     {
-       return  app.UseMiddleware<RolePermissionMiddleware>();
+        return app.UseMiddleware<RolePermissionMiddleware>();
     }
 }

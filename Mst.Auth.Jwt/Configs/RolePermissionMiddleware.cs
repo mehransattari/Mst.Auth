@@ -1,58 +1,64 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace Mst.Auth.Jwt;
 
-/// <summary>
-/// دریافت مقصد درخواست (Endpoint) و بررسی وجود Attribute.
-///استخراج نقش‌ها و دسترسی‌های کاربر از Claims.
-///مقایسه نقش‌ها و دسترسی‌های کاربر با مقادیر تعیین‌شده در Attribute.
-///اگر کاربر مجوز نداشته باشد، درخواست مسدود می‌شود.
-///اگر کاربر مجوز داشته باشد، درخواست ادامه پیدا می‌کند.
-/// </summary>
 public class RolePermissionMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly RolePermissionConfig _config;
 
-    public RolePermissionMiddleware(RequestDelegate next)
+    public RolePermissionMiddleware(RequestDelegate next, IOptions<RolePermissionConfig> config)
     {
         _next = next;
+        _config = config.Value;
     }
 
     public async Task Invoke(HttpContext context)
     {
-        // اگر درخواست به یک کنترلر یا اکشن هدایت شده باشد، اینجا اطلاعات مربوط به آن دریافت می‌شود
-        var endpoint = context.GetEndpoint();
+        var path = context.Request.Path.Value?.ToLower();
 
-        if (endpoint != null)
+        if(path is null)
         {
-            var rolePermissionAttribute = endpoint.Metadata.GetMetadata<RolePermissionAttribute>();
+            await _next(context);
+            return;
+        }
 
-            if (rolePermissionAttribute != null)
+        // ExcludedPaths
+        if (_config.ExcludedPaths.Any(excluded => path.Equals(excluded.ToLower())))
+        {
+            await _next(context);
+            return;
+        }
+
+        // ProtectedEndpoints
+        var protectedEndpoint = _config.ProtectedEndpoints.FirstOrDefault(endpoint => path.Equals(endpoint.Path.ToLower()));
+
+        if (protectedEndpoint != null)
+        {
+            var userRoles = context.User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+
+            var userPermissions = context.User.Claims
+                .Where(c => c.Type == "Permission")
+                .Select(c => c.Value)
+                .ToList();
+
+            // بررسی نقش‌ها و دسترسی‌ها
+            var hasRequiredRole = !protectedEndpoint.Roles.Any() ||
+                                  protectedEndpoint.Roles.Any(role => userRoles.Contains(role));
+
+            var hasRequiredPermission = !protectedEndpoint.Permissions.Any() ||
+                                        protectedEndpoint.Permissions.Any(permission => userPermissions.Contains(permission));
+
+            if (!hasRequiredRole || !hasRequiredPermission)
             {
-                var userRoles = context.User.Claims
-                    .Where(c => c.Type == ClaimTypes.Role)
-                    .Select(c => c.Value)
-                    .ToList();
-
-                var userPermissions = context.User.Claims
-                    .Where(c => c.Type == "Permission")
-                    .Select(c => c.Value)
-                    .ToList();
-
-                var hasRequiredRole = rolePermissionAttribute.Roles.Length == 0 ||
-                                      rolePermissionAttribute.Roles.Any(role => userRoles.Contains(role));
-
-                var hasRequiredPermission = rolePermissionAttribute.Permissions.Length == 0 ||
-                                            rolePermissionAttribute.Permissions.Any(permission => userPermissions.Contains(permission));
-
-                // مسدود کردن دسترسی غیرمجاز
-                if (!hasRequiredRole || !hasRequiredPermission)
-                {
-                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    await context.Response.WriteAsync("Access Denied");
-                    return;
-                }
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await context.Response.WriteAsync("Access Denied");
+                return;
             }
         }
 
