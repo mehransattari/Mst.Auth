@@ -17,9 +17,9 @@ public static class JwtServiceBootstrapper
         return services;
     }
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services,
-                                                         IConfiguration configuration,
-                                                         string jwtSettingSection,
-                                                         string rolePermissionConfig)
+                                                          IConfiguration configuration,
+                                                          string jwtSettingSection,
+                                                          string rolePermissionConfig)
     {
         services.AddSingleton<RolePermissionConfig>();
         var _rolePermissionConfig = configuration.GetSection(rolePermissionConfig);
