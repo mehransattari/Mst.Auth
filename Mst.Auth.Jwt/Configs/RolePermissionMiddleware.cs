@@ -47,19 +47,34 @@ public class RolePermissionMiddleware
                 .Select(c => c.Value)
                 .ToList();
 
-            // بررسی نقش‌ها و دسترسی‌ها
-            var hasRequiredRole = !protectedEndpoint.Roles.Any() ||
-                                  protectedEndpoint.Roles.Any(role => userRoles.Contains(role));
-
-            var hasRequiredPermission = !protectedEndpoint.Permissions.Any() ||
-                                        protectedEndpoint.Permissions.Any(permission => userPermissions.Contains(permission));
-
-            if (!hasRequiredRole || !hasRequiredPermission)
+            if(userRoles.Any())
             {
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                await context.Response.WriteAsync("Access Denied");
-                return;
+                // Exist appSetting Role in database
+                var isExistRoles = !protectedEndpoint.Roles.Any() ||
+                                 protectedEndpoint.Roles.Any(role => userRoles.Contains(role));
+
+                if (!isExistRoles)
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    await context.Response.WriteAsync("Access Denied");
+                    return;
+                }
             }
+
+            if (userPermissions.Any())
+            {
+                // Exist appSetting Permissions in database
+                var isExistPersmissions = !protectedEndpoint.Permissions.Any() ||
+                                      protectedEndpoint.Permissions.Any(permission => userPermissions.Contains(permission));
+
+                if (!isExistPersmissions)
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    await context.Response.WriteAsync("Access Denied");
+                    return;
+                }
+            }
+          
         }
 
         await _next(context);
